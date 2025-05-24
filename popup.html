@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>呼吸卡片生成器</title>
+  <style>
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      width: 320px;
+      margin: 0;
+      padding: 16px;
+      background-color: #f9fafb;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .logo {
+      width: 32px;
+      height: 32px;
+    }
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e3a8a;
+      margin: 0;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      resize: none;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    textarea:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+      outline: none;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .option-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .option-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #334155;
+    }
+    .style-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .style-item {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .style-item.selected {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+    .style-1 {
+      background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    }
+    .style-2 {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    }
+    .style-3 {
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+    }
+    .style-4 {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+    }
+    .style-5 {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    }
+    button {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    button:hover {
+      background-color: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+    button.loading {
+      background-color: #1d4ed8; /* 加载时按钮颜色稍深 */
+      cursor: wait;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.8;
+      }
+    }
+    .result {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 16px;
+      transition: opacity 0.3s ease;
+    }
+    .card-preview {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    .card-preview:hover {
+      transform: scale(1.02);
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+    }
+    .action-btn {
+      flex: 1;
+      background-color: #f8fafc;
+      color: #334155;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .action-btn:hover {
+      background-color: #f1f5f9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    .action-btn:active {
+      transform: translateY(0);
+    }
+    .action-icon {
+      width: 16px;
+      height: 16px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="images/icon48.png" class="logo" alt="呼吸卡片">
+      <div>
+        <h1 class="title">呼吸卡片生成器</h1>
+        <p class="subtitle">轻松生成优雅的知识卡片</p>
+      </div>
+    </div>
+    
+    <div class="input-section">
+      <textarea id="content" placeholder="在此输入文本内容，或者点击右键菜单从网页中选择文本..."></textarea>
+    </div>
+    
+    <div class="options">
+      <div class="option-group">
+        <div class="option-label">卡片风格</div>
+        <div class="style-selector">
+          <div class="style-item style-1 selected" data-style="1"></div>
+          <div class="style-item style-2" data-style="2"></div>
+          <div class="style-item style-3" data-style="3"></div>
+          <div class="style-item style-4" data-style="4"></div>
+          <div class="style-item style-5" data-style="5"></div>
+        </div>
+      </div>
+    </div>
+    
+    <button id="generate">生成卡片</button>
+    
+    <div id="result" class="result">
+      <div class="card-preview">
+        <img id="card-image" src="" width="100%">
+      </div>
+      <div class="actions">
+        <div class="action-btn" id="download">
+          <svg class="action-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 16L12 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 13L12 16L15 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 20H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          下载卡片
+        </div>
+        <div class="action-btn" id="copy">
+          <svg class="action-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 5H6C4.89543 5 4 5.89543 4 7V19C4 20.1046 4.89543 21 6 21H16C17.1046 21 18 20.1046 18 19V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="8" y="3" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          复制卡片
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
